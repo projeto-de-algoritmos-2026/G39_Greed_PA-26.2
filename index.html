@@ -82,11 +82,11 @@
       <div>
         <div class="etapa">Passo 1 de 2</div>
         <h2>Atividades com hora marcada</h2>
-        <p>Já decidiu alguma? Toque e escolha o horário.</p>
+        <p>Já decidiu alguma? Toque no horário que você vai fazer.</p>
       </div>
       <button class="fechar" data-fechar aria-label="Fechar">✕</button>
     </div>
-    <div class="grid" id="grid1"></div>
+    <div class="lista1" id="grid1"></div>
     <div class="m-rod">
       <div class="resumo"><strong id="resumo1">0 atividades</strong><span>Opcional</span></div>
       <button class="btn" id="proximo">Continuar <span class="seta">→</span></button>
@@ -128,38 +128,49 @@
   const interesseSalvo = ler("selecionadas", []);
   const plural = (n, a, b) => `${n} ${n === 1 ? a : b}`;
 
-  $("grid1").innerHTML = FIXAS.map(a => {
-    const f = fixasSalvas.find(x => x.id === a.id);
-    const unico = a.horarios.length === 1;
-    return `
-    <div class="card" data-id="${a.id}">
-      <label class="linha">
-        <input type="checkbox" ${f ? "checked" : ""}>
-        <span class="marca">✓</span>
-        <span><div class="nome">${a.nome}</div><div class="tempo">${a.obs ? a.obs + " · " : ""}${a.horarios.length > 2 ? a.horarios.length + " horários" : a.horarios.join(" ou ")} · ${formatarTempo(a.minutos)}</div></span>
-      </label>
-      <div class="extra">
-        <span>Horário</span>
-        ${a.horarios.map(h => `<label class="pilula"><input type="radio" name="h-${a.id}" value="${h}" ${unico || (f && f.inicio === h) ? "checked" : ""}><span>${h.replace(":00", "h")}</span></label>`).join("")}
-      </div>
-    </div>`;
-  }).join("");
-  const cards1 = [...$("grid1").querySelectorAll(".card")];
+  /* ---------- PASSO 1: escolher horário direto nos botões ---------- */
+  const escolha = {};                                   // id -> "HH:MM"
+  fixasSalvas.forEach(f => { escolha[f.id] = f.inicio; });
+
+  const grupos = [...new Set(FIXAS.map(a => a.grupo))];
+  $("grid1").innerHTML = grupos.map(g => `
+    <section class="grupo1">
+      <h3>${g}</h3>
+      ${FIXAS.filter(a => a.grupo === g).map(a => `
+        <div class="fixa1" data-id="${a.id}">
+          <div class="info">
+            <div class="nome">${a.nome}</div>
+            <div class="meta">${a.obs ? a.obs + " · " : ""}duração ${formatarTempo(a.minutos)}</div>
+          </div>
+          <div class="horas">
+            ${a.horarios.map(h => `<button type="button" class="hora-btn" data-h="${h}" aria-pressed="false">${h.replace(":00", "h")}</button>`).join("")}
+          </div>
+        </div>`).join("")}
+    </section>`).join("");
+
+  function pintar1() {
+    document.querySelectorAll(".fixa1").forEach(row => {
+      const sel = escolha[row.dataset.id];
+      row.classList.toggle("ativa", !!sel);
+      row.querySelectorAll(".hora-btn").forEach(b => b.setAttribute("aria-pressed", b.dataset.h === sel));
+    });
+    const n = Object.keys(escolha).length;
+    $("resumo1").textContent = plural(n, "atividade", "atividades");
+    $("proximo").firstChild.textContent = n ? "Continuar " : "Não tenho, pular ";
+  }
+  $("grid1").addEventListener("click", e => {
+    const btn = e.target.closest(".hora-btn");
+    if (!btn) return;
+    const id = btn.closest(".fixa1").dataset.id;
+    if (escolha[id] === btn.dataset.h) delete escolha[id];   // clicar de novo desmarca
+    else escolha[id] = btn.dataset.h;
+    pintar1();
+  });
 
   function fixas() {
-    return cards1.filter(c => c.querySelector("input[type=checkbox]").checked).map(c => {
-      const a = FIXAS.find(x => x.id === c.dataset.id);
-      const r = c.querySelector("input[type=radio]:checked");
-      return { id: a.id, nome: a.nome, minutos: a.minutos, inicio: r ? r.value : "" };
-    });
+    return FIXAS.filter(a => escolha[a.id]).map(a => ({ id: a.id, nome: a.nome, minutos: a.minutos, inicio: escolha[a.id] }));
   }
-  function atualizar1() {
-    const f = fixas();
-    $("resumo1").textContent = plural(f.length, "atividade", "atividades");
-    $("proximo").disabled = !f.every(x => x.inicio);
-    $("proximo").firstChild.textContent = f.length ? "Continuar " : "Não tenho, pular ";
-  }
-  cards1.forEach(c => c.addEventListener("change", atualizar1));
+  const atualizar1 = pintar1;
 
   let caixas2 = [];
   function montarPasso2() {
