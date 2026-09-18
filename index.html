@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Brasília em um dia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="hero">
+  <div class="grade"></div>
+  <div class="sol"></div>
+
+  <div class="arcos" aria-hidden="true">
+    <svg viewBox="0 0 800 800" preserveAspectRatio="xMidYMid slice" fill="none" stroke="#1d2540" stroke-opacity=".13">
+      <circle cx="400" cy="400" r="190"/><circle cx="400" cy="400" r="250"/>
+      <circle cx="400" cy="400" r="310"/><circle cx="400" cy="400" r="370" stroke-dasharray="2 8"/>
+    </svg>
+  </div>
+
+  <svg class="skyline" viewBox="0 0 1440 200" preserveAspectRatio="xMinYMax slice" aria-hidden="true">
+    <g fill="#1d2540" fill-opacity=".15" stroke="#1d2540" stroke-opacity=".15">
+      <!-- Torre de TV -->
+      <polygon points="114,190 126,190 123,70 117,70"/>
+      <polygon points="98,82 142,82 134,96 106,96"/>
+      <rect x="119" y="10" width="2" height="62" stroke="none"/>
+      <!-- Congresso Nacional -->
+      <rect x="240" y="176" width="340" height="14" stroke="none"/>
+      <path d="M262 176 A40 40 0 0 1 342 176 Z" stroke="none"/>
+      <rect x="392" y="58" width="16" height="118" stroke="none"/>
+      <rect x="424" y="58" width="16" height="118" stroke="none"/>
+      <rect x="392" y="100" width="48" height="6" stroke="none"/>
+      <path d="M470 150 A52 26 0 0 0 574 150 Z" stroke="none"/>
+      <!-- Palácio da Alvorada -->
+      <rect x="640" y="176" width="240" height="14" stroke="none"/>
+      <rect x="636" y="104" width="248" height="8" stroke="none"/>
+      <g stroke="none">
+        <path id="col" d="M650 176 Q640 140 652 112 Q670 140 664 176 Z"/>
+        <use href="#col" x="30"/><use href="#col" x="60"/><use href="#col" x="90"/>
+        <use href="#col" x="120"/><use href="#col" x="150"/><use href="#col" x="180"/>
+      </g>
+    </g>
+    <!-- Ponte JK -->
+    <g fill="none" stroke="#1d2540" stroke-opacity=".15" stroke-width="5" stroke-linecap="round">
+      <path d="M930 176 Q1020 -10 1110 176"/>
+      <path d="M1070 176 Q1160 10 1250 176"/>
+      <path d="M1210 176 Q1300 -10 1390 176"/>
+      <path d="M900 176 H1440" stroke-width="7"/>
+    </g>
+    <rect x="0" y="190" width="1440" height="10" fill="#1d2540" fill-opacity=".2"/>
+  </svg>
+
+  <svg class="catedral" viewBox="-300 0 600 540" id="catedral" role="img" aria-label="Catedral de Brasília"></svg>
+
+  <nav class="topo">
+    <b>Brasília</b>
+    <span class="coord">15°47′S · 47°55′O</span>
+  </nav>
+
+  <section class="conteudo">
+    <div class="selo">Roteiro de 1 dia</div>
+    <h1>Otimize seu dia <em>visitando</em> Brasília</h1>
+    <p class="sub">Conheça o máximo de coisas em um só dia.</p>
+
+    <button class="btn" id="abrir">
+      Selecionar atrações que tenho interesse <span class="seta">→</span>
+    </button>
+
+    <div class="fatos">
+      <div><strong id="qtd">15</strong>atrações</div>
+      <div><strong>1960</strong>capital modernista</div>
+    </div>
+  </section>
+</main>
+
+<dialog id="modal">
+  <!-- PASSO 1: passeios com hora marcada -->
+  <section class="passo" id="passo1">
+    <div class="m-cab">
+      <div>
+        <div class="etapa">Passo 1 de 2</div>
+        <h2>Atividades com hora marcada</h2>
+        <p>Já decidiu alguma? Toque e escolha o horário.</p>
+      </div>
+      <button class="fechar" data-fechar aria-label="Fechar">✕</button>
+    </div>
+    <div class="grid" id="grid1"></div>
+    <div class="m-rod">
+      <div class="resumo"><strong id="resumo1">0 atividades</strong><span>Opcional</span></div>
+      <button class="btn" id="proximo">Continuar <span class="seta">→</span></button>
+    </div>
+  </section>
+
+  <section class="passo" id="passo2" hidden>
+    <div class="m-cab">
+      <div>
+        <div class="etapa">Passo 2 de 2</div>
+        <h2>O que mais você quer conhecer?</h2>
+        <p>Toque nas atrações de interesse.</p>
+      </div>
+      <button class="fechar" data-fechar aria-label="Fechar">✕</button>
+    </div>
+    <button class="todas" id="todas">Selecionar todas</button>
+    <div class="grid" id="grid2"></div>
+    <div class="m-rod">
+      <div class="resumo"><strong id="resumo2">0 atrações</strong><span id="tempoTotal">0 min no total</span></div>
+      <div class="acoes">
+        <button class="voltar" id="voltar">← Voltar</button>
+        <button class="btn" id="ver" disabled>Ver minha lista <span class="seta">→</span></button>
+      </div>
+    </div>
+  </section>
+</dialog>
+
+<script src="atracoes.js"></script>
+<script src="catedral.js"></script>
+<script>
+  desenharCatedral(document.getElementById("catedral"));
+  document.getElementById("qtd").textContent = ATRACOES.length;
+
+  const $ = id => document.getElementById(id);
+  const modal = $("modal");
+  const ler = (k, padrao) => { try { return JSON.parse(sessionStorage.getItem(k)) ?? padrao; } catch (e) { return padrao; } };
+
+  const fixasSalvas = ler("fixas", []);
+  const interesseSalvo = ler("selecionadas", []);
+  const plural = (n, a, b) => `${n} ${n === 1 ? a : b}`;
+
+  $("grid1").innerHTML = FIXAS.map(a => {
+    const f = fixasSalvas.find(x => x.id === a.id);
+    const unico = a.horarios.length === 1;
+    return `
+    <div class="card" data-id="${a.id}">
+      <label class="linha">
+        <input type="checkbox" ${f ? "checked" : ""}>
+        <span class="marca">✓</span>
+        <span><div class="nome">${a.nome}</div><div class="tempo">${a.obs ? a.obs + " · " : ""}${a.horarios.length > 2 ? a.horarios.length + " horários" : a.horarios.join(" ou ")} · ${formatarTempo(a.minutos)}</div></span>
+      </label>
+      <div class="extra">
+        <span>Horário</span>
+        ${a.horarios.map(h => `<label class="pilula"><input type="radio" name="h-${a.id}" value="${h}" ${unico || (f && f.inicio === h) ? "checked" : ""}><span>${h.replace(":00", "h")}</span></label>`).join("")}
+      </div>
+    </div>`;
+  }).join("");
+  const cards1 = [...$("grid1").querySelectorAll(".card")];
+
+  function fixas() {
+    return cards1.filter(c => c.querySelector("input[type=checkbox]").checked).map(c => {
+      const a = FIXAS.find(x => x.id === c.dataset.id);
+      const r = c.querySelector("input[type=radio]:checked");
+      return { id: a.id, nome: a.nome, minutos: a.minutos, inicio: r ? r.value : "" };
+    });
+  }
+  function atualizar1() {
+    const f = fixas();
+    $("resumo1").textContent = plural(f.length, "atividade", "atividades");
+    $("proximo").disabled = !f.every(x => x.inicio);
+    $("proximo").firstChild.textContent = f.length ? "Continuar " : "Não tenho, pular ";
+  }
+  cards1.forEach(c => c.addEventListener("change", atualizar1));
+
+  let caixas2 = [];
+  function montarPasso2() {
+    const livres = ATRACOES;
+    $("grid2").innerHTML = livres.map(a => `
+      <div class="card">
+        <label class="linha">
+          <input type="checkbox" value="${a.id}" ${interesseSalvo.includes(a.id) ? "checked" : ""}>
+          <span class="marca">✓</span>
+          <span><div class="nome">${a.nome}</div><div class="tempo">${formatarTempo(a.minutos)}</div></span>
+        </label>
+      </div>`).join("");
+    caixas2 = [...$("grid2").querySelectorAll("input")];
+    caixas2.forEach(c => c.addEventListener("change", atualizar2));
+    atualizar2();
+  }
+  function escolhidas2() { return caixas2.filter(c => c.checked).map(c => +c.value); }
+  function atualizar2() {
+    const f = fixas();
+    const ids = escolhidas2();
+    const min = ATRACOES.filter(a => ids.includes(a.id)).reduce((s, a) => s + a.minutos, 0)
+              + f.reduce((s, x) => s + x.minutos, 0);
+    const total = ids.length + f.length;
+    $("resumo2").textContent = plural(total, "atração", "atrações");
+    $("tempoTotal").textContent = `${formatarTempo(min)} no total`;
+    $("ver").disabled = total === 0;
+    $("todas").textContent = ids.length === caixas2.length ? "Limpar seleção" : "Selecionar todas";
+  }
+  $("todas").addEventListener("click", () => {
+    const marcar = caixas2.some(c => !c.checked);
+    caixas2.forEach(c => (c.checked = marcar));
+    atualizar2();
+  });
+
+  function ir(n) { $("passo1").hidden = n !== 1; $("passo2").hidden = n !== 2; }
+  $("abrir").addEventListener("click", () => { ir(1); atualizar1(); modal.showModal(); });
+  document.querySelectorAll("[data-fechar]").forEach(b => b.addEventListener("click", () => modal.close()));
+  modal.addEventListener("click", e => { if (e.target === modal) modal.close(); });
+  $("proximo").addEventListener("click", () => { montarPasso2(); ir(2); });
+  $("voltar").addEventListener("click", () => ir(1));
+  $("ver").addEventListener("click", () => {
+    sessionStorage.setItem("fixas", JSON.stringify(fixas()));
+    sessionStorage.setItem("selecionadas", JSON.stringify(escolhidas2()));
+    location.href = "lista.html";
+  });
+  atualizar1();
+</script>
+</body>
+</html>

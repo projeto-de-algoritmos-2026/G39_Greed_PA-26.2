@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seu roteiro · Brasília</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="pagina">
+  <div class="sol"></div>
+  <svg class="catedral" viewBox="-300 0 600 540" id="catedral" aria-hidden="true"></svg>
+
+  <nav class="topo"><b>Brasília</b><span class="coord">15°47′S · 47°55′O</span></nav>
+
+  <section class="roteiro">
+    <div class="selo">Seu roteiro</div>
+    <h1>Seu dia em <em>Brasília</em></h1>
+    <p class="sub">As atrações que você escolheu.</p>
+
+    <div id="conteudo"></div>
+
+    <a class="btn claro" href="index.html">← Escolher outras</a>
+  </section>
+</main>
+
+<script src="atracoes.js"></script>
+<script src="catedral.js"></script>
+<script>
+  desenharCatedral(document.getElementById("catedral"));
+
+  const ler = (k) => { try { return JSON.parse(sessionStorage.getItem(k)) || []; } catch (e) { return []; } };
+  const fixas = ler("fixas").filter(f => f.nome && f.inicio);
+  const ids = ler("selecionadas");
+  
+  const paraMin = h => { const [H, M] = h.split(":").map(Number); return H * 60 + M; };
+  const paraHora = m => `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+
+  const marcadas = fixas
+    .map(f => ({ ...f, ini: paraMin(f.inicio), fim: paraMin(f.inicio) + f.minutos }))
+    .sort((a, b) => a.ini - b.ini);
+  const livres = ATRACOES.filter(a => ids.includes(a.id));
+
+  let html = "";
+  if (marcadas.length) {
+    html += '<div class="grupo">Com hora marcada</div><ol class="lista">' + marcadas.map((f, i) => {
+      return `<li class="fixa" style="animation-delay:${i * 60}ms">
+        <span class="hora">${paraHora(f.ini)} – ${paraHora(f.fim)}</span>
+        <span class="nome">${f.nome}</span>
+        <span class="tempo">${formatarTempo(f.minutos)}</span>
+      </li>`;
+    }).join("") + "</ol>";
+  }
+  if (livres.length) {
+    html += `<div class="grupo">${marcadas.length ? "Para encaixar no dia" : "Suas atrações"}</div><ol class="lista">` +
+      livres.map((a, i) => `<li style="animation-delay:${(i + marcadas.length) * 60}ms">
+        <span class="nome">${a.nome}</span><span class="tempo">${formatarTempo(a.minutos)}</span></li>`).join("") + "</ol>";
+  }
+  if (!html) html = '<p class="vazio">Você ainda não escolheu nenhuma atração.</p>';
+  else {
+    const min = marcadas.reduce((s, f) => s + f.minutos, 0) + livres.reduce((s, a) => s + a.minutos, 0);
+    html += `<div class="total"><span>Tempo total</span><strong>${formatarTempo(min)}</strong></div>`;
+  }
+  document.getElementById("conteudo").innerHTML = html;
+</script>
+</body>
+</html>
