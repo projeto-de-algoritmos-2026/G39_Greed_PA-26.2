@@ -12,7 +12,7 @@ O usuário seleciona as atrações que deseja visitar e o horário de cada uma. 
 
 | Foto | Nome | Matrícula |
 | :---: | --- | --- |
-| <img src="https://github.com/isacostaf.png" width="80"> | ISABELLE DA COSTA FIGUEIREDO ([@isacostaf](https://github.com/isacostaf)) | 211039500 |
+| <img src="https://github.com/isacostaf.png" width="80"> | ISABELLE DA COSTA FIGUEIREDO| 211039500 |
 
 
 ## Vídeo de apresentação
