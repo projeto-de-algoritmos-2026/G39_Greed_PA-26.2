@@ -76,40 +76,18 @@
 </main>
 
 <dialog id="modal">
-  <!-- PASSO 1: passeios com hora marcada -->
   <section class="passo" id="passo1">
     <div class="m-cab">
       <div>
-        <div class="etapa">Passo 1 de 2</div>
-        <h2>Atividades com hora marcada</h2>
-        <p>Já decidiu alguma? Toque no horário que você vai fazer.</p>
+        <h2>O que você quer fazer?</h2>
+        <p>Toque no horário em que você vai fazer cada atividade.</p>
       </div>
       <button class="fechar" data-fechar aria-label="Fechar">✕</button>
     </div>
     <div class="lista1" id="grid1"></div>
     <div class="m-rod">
-      <div class="resumo"><strong id="resumo1">0 atividades</strong><span>Opcional</span></div>
-      <button class="btn" id="proximo">Continuar <span class="seta">→</span></button>
-    </div>
-  </section>
-
-  <section class="passo" id="passo2" hidden>
-    <div class="m-cab">
-      <div>
-        <div class="etapa">Passo 2 de 2</div>
-        <h2>O que mais você quer conhecer?</h2>
-        <p>Toque nas atrações de interesse.</p>
-      </div>
-      <button class="fechar" data-fechar aria-label="Fechar">✕</button>
-    </div>
-    <button class="todas" id="todas">Selecionar todas</button>
-    <div class="grid" id="grid2"></div>
-    <div class="m-rod">
-      <div class="resumo"><strong id="resumo2">0 atrações</strong><span id="tempoTotal">0 min no total</span></div>
-      <div class="acoes">
-        <button class="voltar" id="voltar">← Voltar</button>
-        <button class="btn" id="ver" disabled>Ver minha lista <span class="seta">→</span></button>
-      </div>
+      <div class="resumo"><strong id="resumo1">0 atividades</strong><span id="tempoTotal">0 min no total</span></div>
+      <button class="btn" id="ver" disabled>Ver minha lista <span class="seta">→</span></button>
     </div>
   </section>
 </dialog>
@@ -118,17 +96,16 @@
 <script src="catedral.js"></script>
 <script>
   desenharCatedral(document.getElementById("catedral"));
-  document.getElementById("qtd").textContent = ATRACOES.length;
+  document.getElementById("qtd").textContent = FIXAS.length;
 
   const $ = id => document.getElementById(id);
   const modal = $("modal");
   const ler = (k, padrao) => { try { return JSON.parse(sessionStorage.getItem(k)) ?? padrao; } catch (e) { return padrao; } };
 
   const fixasSalvas = ler("fixas", []);
-  const interesseSalvo = ler("selecionadas", []);
   const plural = (n, a, b) => `${n} ${n === 1 ? a : b}`;
 
-  /* ---------- PASSO 1: escolher horário direto nos botões ---------- */
+  /* ---------- escolher horário direto nos botões ---------- */
   const escolha = {};                                   // id -> "HH:MM"
   fixasSalvas.forEach(f => { escolha[f.id] = f.inicio; });
 
@@ -154,9 +131,10 @@
       row.classList.toggle("ativa", !!sel);
       row.querySelectorAll(".hora-btn").forEach(b => b.setAttribute("aria-pressed", b.dataset.h === sel));
     });
-    const n = Object.keys(escolha).length;
-    $("resumo1").textContent = plural(n, "atividade", "atividades");
-    $("proximo").firstChild.textContent = n ? "Continuar " : "Não tenho, pular ";
+    const f = fixas();
+    $("resumo1").textContent = plural(f.length, "atividade", "atividades");
+    $("tempoTotal").textContent = `${formatarTempo(f.reduce((s, x) => s + x.minutos, 0))} no total`;
+    $("ver").disabled = f.length === 0;
   }
   $("grid1").addEventListener("click", e => {
     const btn = e.target.closest(".hora-btn");
@@ -170,53 +148,14 @@
   function fixas() {
     return FIXAS.filter(a => escolha[a.id]).map(a => ({ id: a.id, nome: a.nome, minutos: a.minutos, inicio: escolha[a.id] }));
   }
-  const atualizar1 = pintar1;
-
-  let caixas2 = [];
-  function montarPasso2() {
-    const livres = ATRACOES;
-    $("grid2").innerHTML = livres.map(a => `
-      <div class="card">
-        <label class="linha">
-          <input type="checkbox" value="${a.id}" ${interesseSalvo.includes(a.id) ? "checked" : ""}>
-          <span class="marca">✓</span>
-          <span><div class="nome">${a.nome}</div><div class="tempo">${formatarTempo(a.minutos)}</div></span>
-        </label>
-      </div>`).join("");
-    caixas2 = [...$("grid2").querySelectorAll("input")];
-    caixas2.forEach(c => c.addEventListener("change", atualizar2));
-    atualizar2();
-  }
-  function escolhidas2() { return caixas2.filter(c => c.checked).map(c => +c.value); }
-  function atualizar2() {
-    const f = fixas();
-    const ids = escolhidas2();
-    const min = ATRACOES.filter(a => ids.includes(a.id)).reduce((s, a) => s + a.minutos, 0)
-              + f.reduce((s, x) => s + x.minutos, 0);
-    const total = ids.length + f.length;
-    $("resumo2").textContent = plural(total, "atração", "atrações");
-    $("tempoTotal").textContent = `${formatarTempo(min)} no total`;
-    $("ver").disabled = total === 0;
-    $("todas").textContent = ids.length === caixas2.length ? "Limpar seleção" : "Selecionar todas";
-  }
-  $("todas").addEventListener("click", () => {
-    const marcar = caixas2.some(c => !c.checked);
-    caixas2.forEach(c => (c.checked = marcar));
-    atualizar2();
-  });
-
-  function ir(n) { $("passo1").hidden = n !== 1; $("passo2").hidden = n !== 2; }
-  $("abrir").addEventListener("click", () => { ir(1); atualizar1(); modal.showModal(); });
+  $("abrir").addEventListener("click", () => { pintar1(); modal.showModal(); });
   document.querySelectorAll("[data-fechar]").forEach(b => b.addEventListener("click", () => modal.close()));
   modal.addEventListener("click", e => { if (e.target === modal) modal.close(); });
-  $("proximo").addEventListener("click", () => { montarPasso2(); ir(2); });
-  $("voltar").addEventListener("click", () => ir(1));
   $("ver").addEventListener("click", () => {
     sessionStorage.setItem("fixas", JSON.stringify(fixas()));
-    sessionStorage.setItem("selecionadas", JSON.stringify(escolhidas2()));
     location.href = "lista.html";
   });
-  atualizar1();
+  pintar1();
 </script>
 </body>
 </html>
