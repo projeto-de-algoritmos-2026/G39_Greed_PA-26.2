@@ -18,7 +18,7 @@
   <section class="roteiro">
     <div class="selo">Seu roteiro</div>
     <h1>Seu dia em <em>Brasília</em></h1>
-    <p class="sub">As atrações que você escolheu.</p>
+    <p class="sub">O máximo de atrações que cabem no seu dia, sem conflito de horário.</p>
 
     <div id="conteudo"></div>
 
@@ -28,29 +28,45 @@
 
 <script src="atracoes.js"></script>
 <script src="catedral.js"></script>
+<script src="interval-scheduling.js"></script>
 <script>
   desenharCatedral(document.getElementById("catedral"));
 
   const ler = (k) => { try { return JSON.parse(sessionStorage.getItem(k)) || []; } catch (e) { return []; } };
-  const fixas = ler("fixas").filter(f => f.nome && f.inicio);
-
   const paraMin = h => { const [H, M] = h.split(":").map(Number); return H * 60 + M; };
   const paraHora = m => `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 
-  const marcadas = fixas
-    .map(f => ({ ...f, ini: paraMin(f.inicio), fim: paraMin(f.inicio) + f.minutos }))
-    .sort((a, b) => a.ini - b.ini);
+  // 1. Pega as atrações e horários que a pessoa escolheu na tela anterior
+  const selecao = ler("fixas").filter(f => f.nome && f.inicio);
+
+  // 2. Transforma cada horário em minutos (início e fim)
+  const atracoes = selecao.map(f => ({
+    nome: f.nome,
+    minutos: f.minutos,
+    inicio: paraMin(f.inicio),
+    fim: paraMin(f.inicio) + f.minutos,
+  }));
+
+  // 3. Aplica o Interval Scheduling
+  const { escolhidas, deFora } = intervalScheduling(atracoes);
+
+  // 4. Mostra o resultado na tela
+  const linha = (a, i) => `<li class="fixa" style="animation-delay:${i * 60}ms">
+      <span class="hora">${paraHora(a.inicio)} – ${paraHora(a.fim)}</span>
+      <span class="nome">${a.nome}</span>
+      <span class="tempo">${formatarTempo(a.minutos)}</span>
+    </li>`;
 
   let html;
-  if (!marcadas.length) html = '<p class="vazio">Você ainda não escolheu nenhuma atração.</p>';
+  if (!escolhidas.length) html = '<p class="vazio">Você ainda não escolheu nenhuma atração.</p>';
   else {
-    html = '<ol class="lista">' + marcadas.map((f, i) => `<li class="fixa" style="animation-delay:${i * 60}ms">
-        <span class="hora">${paraHora(f.ini)} – ${paraHora(f.fim)}</span>
-        <span class="nome">${f.nome}</span>
-        <span class="tempo">${formatarTempo(f.minutos)}</span>
-      </li>`).join("") + "</ol>";
-    const min = marcadas.reduce((s, f) => s + f.minutos, 0);
-    html += `<div class="total"><span>Tempo total</span><strong>${formatarTempo(min)}</strong></div>`;
+    html = '<ol class="lista">' + escolhidas.map(linha).join("") + "</ol>";
+    const min = escolhidas.reduce((s, a) => s + a.minutos, 0);
+    html += `<div class="total"><span>${escolhidas.length} de ${atracoes.length} atrações</span><strong>${formatarTempo(min)}</strong></div>`;
+  }
+  if (deFora.length) {
+    html += '<div class="grupo">Ficaram de fora por conflito de horário</div>';
+    html += '<ol class="lista fora">' + deFora.sort((a, b) => a.inicio - b.inicio).map(linha).join("") + "</ol>";
   }
   document.getElementById("conteudo").innerHTML = html;
 </script>
