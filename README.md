@@ -1,7 +1,5 @@
 # Brasília em um dia
 
-**Projeto de Algoritmos · UnB · 2026.2 · Grupo 39 · Tema: Algoritmos Ambiciosos (Greed)**
-
 ## Sobre o projeto
 
 Este projeto aplica o algoritmo guloso **Interval Scheduling**, visto em aula, a um problema prático: montar um roteiro de um dia em Brasília.
@@ -10,9 +8,9 @@ O usuário seleciona as atrações que deseja visitar e o horário de cada uma. 
 
 ## Alunos
 
-| Foto | Nome | Matrícula |
-| :---: | --- | --- |
-| <img src="https://github.com/isacostaf.png" width="80"> | ISABELLE DA COSTA FIGUEIREDO| 211039500 |
+| Nome | Matrícula |
+| --- | --- |
+| ISABELLE DA COSTA FIGUEIREDO| 211039500 |
 
 
 ## Vídeo de apresentação
