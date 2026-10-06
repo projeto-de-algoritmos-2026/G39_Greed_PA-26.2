@@ -15,7 +15,7 @@ O usuário seleciona as atrações que deseja visitar e o horário de cada uma. 
 
 ## Vídeo de apresentação
 
-[▶️ Assistir no YouTube](https://youtu.be/1u6ij9rohTg?feature=shared)
+[▶️ Assistir no YouTube](https://youtu.be/9WqMiEV6RLU?feature=shared)
 
 ## Arquivos do projeto
 
